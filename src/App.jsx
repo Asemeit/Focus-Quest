@@ -75,9 +75,9 @@ function App() {
   };
 
   const getAvatar = () => {
-    if (level >= 15) return '/assets/avatar_master_1768066997846.png';
-    if (level >= 5) return '/assets/avatar_adept_1768066981656.png';
-    return '/assets/avatar_novice_1768066967102.png';
+    if (level >= 15) return 'assets/avatar_master_1768066997846.png';
+    if (level >= 5) return 'assets/avatar_adept_1768066981656.png';
+    return 'assets/avatar_novice_1768066967102.png';
   };
 
   const getRankTitle = () => {
@@ -141,7 +141,7 @@ function App() {
             <div className="boss-container pixel-card" style={{ marginBottom: '2rem', borderColor: 'var(--danger-color)', boxShadow: '0 0 20px var(--danger-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <img
-                  src="/assets/boss_cyber_dragon_1768072954913.png"
+                  src="assets/boss_cyber_dragon_1768072954913.png"
                   alt="Cyber Dragon Boss"
                   style={{ width: '100px', height: '100px', imageRendering: 'pixelated', animation: 'float 3s ease-in-out infinite' }}
                 />
