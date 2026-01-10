@@ -38,4 +38,4 @@
     ```
 
 ---
-*Built with React & 💜 by S A R D A R*
+*Built with React & 💜 by Precious*
