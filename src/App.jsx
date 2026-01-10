@@ -184,7 +184,7 @@ function App() {
           )}
 
           <div className="pixel-card">
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
+            <div className="mode-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
               <button
                 className={`pixel-btn ${mode === 'FOCUS' ? '' : 'secondary'}`}
                 onClick={() => handleModeChange('FOCUS')}

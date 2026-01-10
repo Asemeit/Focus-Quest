@@ -260,3 +260,30 @@ h1 {
     text-shadow: 2px 2px 0px #d600ff, -2px -2px 0px #00ff41;
   }
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  #root {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .pixel-btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    margin: 5px;
+  }
+
+  /* Force buttons to wrap if needed */
+  .mode-buttons {
+    flex-wrap: wrap;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
