@@ -21,21 +21,7 @@
 *   Canvas Confetti
 *   Web Audio API (Synthesized Sound Effects)
 
-## 🏃‍♂️ How to Run
 
-1.  Clone the repo:
-    ```bash
-    git clone https://github.com/YOUR_USERNAME/focus-quest.git
-    cd focus-quest
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the quest:
-    ```bash
-    npm run dev
-    ```
 
 ---
 *Built with React & 💜 by Precious*
