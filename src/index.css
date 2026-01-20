@@ -10,6 +10,8 @@
   --primary-color: #d600ff;
   /* Cyber pink */
   --primary-glow: 0 0 10px #d600ff, 0 0 20px #d600ff;
+  --danger-color: #ff4444;
+  /* Added for Boss HP Bar */
 
   --font-pixel: 'Courier New', Courier, monospace;
 }

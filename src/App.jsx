@@ -5,6 +5,12 @@ import { useGameLogic } from './hooks/useGameLogic'
 import { useSound } from './hooks/useSound'
 import './index.css'
 
+// Import Assets Directly
+import dragonImg from './assets/boss_cyber_dragon_1768072954913.png'
+import noviceImg from './assets/avatar_novice_1768066967102.png'
+import adeptImg from './assets/avatar_adept_1768066981656.png'
+import masterImg from './assets/avatar_master_1768066997846.png'
+
 const THEMES = [
   { id: 'default', name: 'Cyberpunk', cost: 0, color: '#d600ff' },
   { id: 'matrix', name: 'Matrix', cost: 50, color: '#00ff00' },
@@ -13,12 +19,13 @@ const THEMES = [
 ];
 
 function App() {
-  const { xp, level, coins, unlockedThemes, currentTheme, addXp, getProgressToNextLevel, buyTheme, equipTheme } = useGameLogic();
+  const { xp, level, coins, unlockedThemes, currentTheme, questHistory, addXp, saveQuest, getProgressToNextLevel, buyTheme, equipTheme } = useGameLogic();
   const { playStart, playPause, playComplete, playLevelUp, playClick } = useSound();
 
   // Track previous level to play sound on level up
   const [prevLevel, setPrevLevel] = useState(level);
   const [showShop, setShowShop] = useState(false);
+  const [showHistory, setShowHistory] = useState(false); // New state for History Modal
   const [questName, setQuestName] = useState('');
 
   useEffect(() => {
@@ -36,12 +43,14 @@ function App() {
         earnedXp += 50; // Bonus for named quest
       }
       addXp(earnedXp);
+      saveQuest(questName, earnedXp); // Save to history
       console.log(`Focus session complete! +${earnedXp} XP`);
     }
   };
 
   const { timeLeft, isActive, toggleTimer, resetTimer, mode, setTimerMode } = useTimer(25, onTimerComplete);
 
+  // ... (rest of helper functions same) ...
   const handleToggleTimer = () => {
     if (!isActive) {
       if (mode === 'FOCUS' && !questName.trim()) {
@@ -54,32 +63,18 @@ function App() {
     toggleTimer();
   };
 
-
-  const handleModeChange = (newMode) => {
-    playClick();
-    setTimerMode(newMode);
-  };
-
-  const handleBuy = (id, cost) => {
-    if (buyTheme(id, cost)) {
-      playLevelUp(); // Success sound
-    } else {
-      // Fail sound?
-    }
-  };
-
+  const handleModeChange = (newMode) => { playClick(); setTimerMode(newMode); };
+  const handleBuy = (id, cost) => { if (buyTheme(id, cost)) playLevelUp(); };
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
-
   const getAvatar = () => {
-    if (level >= 15) return 'assets/avatar_master_1768066997846.png';
-    if (level >= 5) return 'assets/avatar_adept_1768066981656.png';
-    return 'assets/avatar_novice_1768066967102.png';
+    if (level >= 15) return masterImg;
+    if (level >= 5) return adeptImg;
+    return noviceImg;
   };
-
   const getRankTitle = () => {
     if (level >= 15) return 'LEGENDARY';
     if (level >= 5) return 'KNIGHT';
@@ -94,38 +89,53 @@ function App() {
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ margin: 0, textShadow: '4px 4px 0 #000' }}>FOCUS QUEST</h1>
-        <button className="pixel-btn secondary" onClick={() => setShowShop(!showShop)} style={{ padding: '8px 16px', fontSize: '1rem' }}>
-          <ShoppingBag size={20} style={{ marginRight: '5px' }} /> SHOP
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="pixel-btn secondary" onClick={() => setShowHistory(!showHistory)} style={{ padding: '8px 16px', fontSize: '1rem' }}>
+            <Trophy size={20} style={{ marginRight: '5px' }} /> LOG
+          </button>
+          <button className="pixel-btn secondary" onClick={() => setShowShop(!showShop)} style={{ padding: '8px 16px', fontSize: '1rem' }}>
+            <ShoppingBag size={20} style={{ marginRight: '5px' }} /> SHOP
+          </button>
+        </div>
       </div>
 
-      {showShop ? (
+      {showHistory ? (
         <div className="pixel-card" style={{ marginBottom: '2rem' }}>
+          <h2 style={{ color: 'var(--accent-color)', marginBottom: '1rem' }}>QUEST LOG</h2>
+          {questHistory.length === 0 ? (
+            <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No completed quests yet. FIGHT!</div>
+          ) : (
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {questHistory.map(q => (
+                <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{q.text}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{q.date}</div>
+                  </div>
+                  <div style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>+{q.xp} XP</div>
+                </div>
+              ))}
+            </div>
+          )}
+          <button className="pixel-btn secondary" onClick={() => setShowHistory(false)} style={{ marginTop: '1rem' }}>CLOSE</button>
+        </div>
+      ) : showShop ? (
+        <div className="pixel-card" style={{ marginBottom: '2rem' }}>
+          {/* ... (Shop UI remains exactly the same) ... */}
           <h2 style={{ color: 'var(--accent-color)', marginBottom: '1rem' }}>MERCHANT ({coins} COINS)</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             {THEMES.map(theme => {
               const isUnlocked = unlockedThemes.includes(theme.id);
               const isEquipped = currentTheme === theme.id;
-
               return (
                 <div key={theme.id} className="pixel-card" style={{ padding: '1rem', border: `2px solid ${theme.color}` }}>
                   <div style={{ color: theme.color, fontWeight: 'bold', marginBottom: '0.5rem' }}>{theme.name}</div>
                   {isUnlocked ? (
-                    <button
-                      className={`pixel-btn ${isEquipped ? '' : 'secondary'}`}
-                      style={{ width: '100%', fontSize: '0.8rem', padding: '5px' }}
-                      onClick={() => equipTheme(theme.id)}
-                      disabled={isEquipped}
-                    >
+                    <button className={`pixel-btn ${isEquipped ? '' : 'secondary'}`} style={{ width: '100%', fontSize: '0.8rem', padding: '5px' }} onClick={() => equipTheme(theme.id)} disabled={isEquipped}>
                       {isEquipped ? <><Check size={14} inline /> EQUIPPED</> : 'EQUIP'}
                     </button>
                   ) : (
-                    <button
-                      className="pixel-btn"
-                      style={{ width: '100%', fontSize: '0.8rem', padding: '5px', filter: coins < theme.cost ? 'grayscale(1)' : 'none' }}
-                      onClick={() => handleBuy(theme.id, theme.cost)}
-                      disabled={coins < theme.cost}
-                    >
+                    <button className="pixel-btn" style={{ width: '100%', fontSize: '0.8rem', padding: '5px', filter: coins < theme.cost ? 'grayscale(1)' : 'none' }} onClick={() => handleBuy(theme.id, theme.cost)} disabled={coins < theme.cost}>
                       <Lock size={14} inline style={{ marginRight: '4px' }} /> {theme.cost}
                     </button>
                   )}
@@ -141,7 +151,7 @@ function App() {
             <div className="boss-container pixel-card" style={{ marginBottom: '2rem', borderColor: 'var(--danger-color)', boxShadow: '0 0 20px var(--danger-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <img
-                  src="assets/boss_cyber_dragon_1768072954913.png"
+                  src={dragonImg}
                   alt="Cyber Dragon Boss"
                   style={{ width: '100px', height: '100px', imageRendering: 'pixelated', animation: 'float 3s ease-in-out infinite' }}
                 />
@@ -185,26 +195,16 @@ function App() {
 
           <div className="pixel-card">
             <div className="mode-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-              <button
-                className={`pixel-btn ${mode === 'FOCUS' ? '' : 'secondary'}`}
-                onClick={() => handleModeChange('FOCUS')}
-              >
+              <button className={`pixel-btn ${mode === 'FOCUS' ? '' : 'secondary'}`} onClick={() => handleModeChange('FOCUS')}>
                 <Brain size={18} style={{ marginRight: '8px' }} /> Focus
               </button>
-              <button
-                className={`pixel-btn ${mode === 'SHORT_BREAK' ? '' : 'secondary'}`}
-                onClick={() => handleModeChange('SHORT_BREAK')}
-              >
+              <button className={`pixel-btn ${mode === 'SHORT_BREAK' ? '' : 'secondary'}`} onClick={() => handleModeChange('SHORT_BREAK')}>
                 <Coffee size={18} style={{ marginRight: '8px' }} /> Short Break
               </button>
-              <button
-                className={`pixel-btn ${mode === 'LONG_BREAK' ? '' : 'secondary'}`}
-                onClick={() => handleModeChange('LONG_BREAK')}
-              >
+              <button className={`pixel-btn ${mode === 'LONG_BREAK' ? '' : 'secondary'}`} onClick={() => handleModeChange('LONG_BREAK')}>
                 <Zap size={18} style={{ marginRight: '8px' }} /> Long Break
               </button>
             </div>
-
 
             <div style={{ fontSize: '5rem', fontWeight: 'bold', margin: '1rem 0', textShadow: '4px 4px 0 #000' }}>
               {formatTime(timeLeft)}
